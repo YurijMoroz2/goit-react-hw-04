@@ -51,3 +51,6 @@ h1:hover{
   color: #888;
 } */
 
+.loader{
+  max-width: 0 auto;
+}
