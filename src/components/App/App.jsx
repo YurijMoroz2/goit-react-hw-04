@@ -1,31 +1,29 @@
 import { useState, useEffect } from 'react';
 import './App.css';
 import { Toaster } from 'react-hot-toast';
-// import axios from 'axios';
+import css from '../Loader/Loader.module.css'
 import { ImageGallery } from '../ImageGallery/ImageGallery';
 import { fetchFoto } from '../../api';
-import { SearchForm } from '../SearchBar/SearchBar';
+import { SearchBar} from '../SearchBar/SearchBar';
 import { ErrorMessage } from '../ErrorMessage/ErrorMessage';
-// import Modal from 'react-modal';
-import { Loader } from '../Loader/Loader';
 
+import { Loader } from '../Loader/Loader';
+// ------------------------------------------------
 const App = () => {
-  // ------------------------------------------------
-  const [articles, setArticles] = useState([]);
+  const [foto, setFoto] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(false);
   const [query, setQuery] = useState('');
   const [page, setPage] = useState(1);
-  // console.log(articles);
-
+  const [showBtn, setShowBtn] = useState(true);
+  
   // --------------------------------------------------
   const handleSearch = async topic => {
     setQuery(`${Date.now()}/${topic}`);
     setPage(1);
     setError(false);
-    setArticles([]);
+    setFoto([]);
     setLoading(true);
-    // -------------------
   };
   // --------------------------------------------------------
   useEffect(() => {
@@ -34,17 +32,14 @@ const App = () => {
     }
 
     async function fetchFotoGallery() {
-      // console.log(query, page);
       try {
-        // setArtic  les([])
         setLoading(true);
+        // 1.Створюємо фун-ю запиту
         const data = await fetchFoto(query.split('/')[1], page);
 
-        // console.log(data);
-        // ------------------------
         // 2. Записуємо дані в стан
-        setArticles(prevArticles => [...prevArticles, ...data]);
-        // setArticles( data);
+        setFoto(prevFoto => [...prevFoto, ...data.results]);
+        setShowBtn(data.total_pages && data.total_pages !== page);
       } catch (error) {
         setError(true);
       } finally {
@@ -57,24 +52,22 @@ const App = () => {
 
   const handleLoadMore = () => {
     setPage(page + 1);
-    // console.log(page);
   };
 
   return (
     <div>
-      <h1>Latest articles</h1>
-      <SearchForm onSearch={handleSearch} />
+      <SearchBar onSearch={handleSearch} />
       <Toaster />
 
       <ErrorMessage error={error} />
-      {articles.length > 0 && <ImageGallery items={articles} />}
-
+      {foto.length > 0 && <ImageGallery items={foto} />}
+      
       {loading && (
-        <div className="loader">
+        <div className={css.loader}>
           <Loader />
         </div>
       )}
-      {articles.length > 0 && !loading && <button onClick={handleLoadMore}>LoadMore</button>}
+      {foto.length > 0 && !loading && showBtn && <button onClick={handleLoadMore}>LoadMore</button>}
     </div>
   );
 };
